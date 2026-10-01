@@ -7,3 +7,4 @@ target/
 .idea/
 .vscode/
 data/rvl-cdip-sample/
+bpm-service/src/main/resources/application.properties
