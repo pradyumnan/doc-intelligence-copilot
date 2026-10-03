@@ -7,6 +7,11 @@ import com.pradyumnan.bpm_service.repository.CaseRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.core.io.ByteArrayResource;
 
 @Service
 public class CaseService {
@@ -52,4 +57,33 @@ public class CaseService {
 
         return caseRepository.save(documentCase);
     }
+
+    public Case processDocumentImage(MultipartFile file) throws Exception {
+    ByteArrayResource fileResource = new ByteArrayResource(file.getBytes()) {
+        @Override
+        public String getFilename() {
+            return file.getOriginalFilename();
+        }
+    };
+
+    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+    body.add("file", fileResource);
+
+    DecisionResponse aiResponse = restClient.post()
+            .uri("/agent/decide-from-image")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(body)
+            .retrieve()
+            .body(DecisionResponse.class);
+
+    Case documentCase = new Case();
+    documentCase.setFilename(aiResponse.getFilename());
+    documentCase.setCategory(aiResponse.getCategory());
+    documentCase.setRoute(aiResponse.getRoute());
+    documentCase.setJustification(aiResponse.getJustification());
+    documentCase.setConfidence(aiResponse.getConfidence());
+    documentCase.setFinalStatus(aiResponse.getFinalStatus());
+
+    return caseRepository.save(documentCase);
+}
 }
