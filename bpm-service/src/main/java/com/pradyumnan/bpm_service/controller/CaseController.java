@@ -5,6 +5,7 @@ import com.pradyumnan.bpm_service.service.CaseService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.RequestParam;
+import java.util.List;
 
 @RestController
 @RequestMapping("/cases")
@@ -30,4 +31,9 @@ public class CaseController {
 public Case processImage(@RequestParam("file") MultipartFile file) throws Exception {
     return caseService.processDocumentImage(file);
 }
+@GetMapping
+public List<Case> getAllCases() {
+    return caseService.getAllCases();
+}
+
 }

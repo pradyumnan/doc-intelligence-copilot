@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.core.io.ByteArrayResource;
+import java.util.List;
 
 @Service
 public class CaseService {
@@ -86,4 +87,8 @@ public class CaseService {
 
     return caseRepository.save(documentCase);
 }
+public List<Case> getAllCases() {
+    return caseRepository.findAll();
+}
+
 }
