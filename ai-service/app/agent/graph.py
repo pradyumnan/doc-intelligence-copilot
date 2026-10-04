@@ -7,9 +7,12 @@ from langchain_groq import ChatGroq
 from dotenv import load_dotenv
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+APP_DIR = os.path.join(SCRIPT_DIR, "..")
 RETRIEVAL_DIR = os.path.join(SCRIPT_DIR, "..", "retrieval")
+sys.path.append(APP_DIR)
 sys.path.append(RETRIEVAL_DIR)
 
+from logging_config import logger
 from search import search_policies
 
 load_dotenv()
@@ -55,6 +58,7 @@ Category:"""
         if c in result:
             category = c
             break
+    logger.info(f"Classified '{state['filename']}' as category: {category}")
 
     return {**state, "category": category}
 
@@ -95,19 +99,20 @@ JSON response:"""
         response = llm.invoke(prompt)
         decision = json.loads(response.content.strip())
 
-        # validate the response has what we need, with sane fallbacks
         if not all(k in decision for k in ["route", "justification", "confidence"]):
             raise ValueError("LLM response missing required fields")
 
-        decision["confidence"] = max(0.0, min(1.0, float(decision["confidence"])))  # clamp to valid range
+        decision["confidence"] = max(0.0, min(1.0, float(decision["confidence"])))
 
     except json.JSONDecodeError:
+        logger.warning(f"LLM returned invalid JSON for '{state['filename']}', falling back to manual review")
         decision = {
             "route": "Manual Review Queue",
             "justification": "AI could not produce a structured decision; flagged for manual review.",
             "confidence": 0.0
         }
     except Exception as e:
+        logger.error(f"Decision error for '{state['filename']}': {e}")
         decision = {
             "route": "Manual Review Queue",
             "justification": f"Decision process encountered an error: {str(e)[:100]}. Flagged for manual review.",
@@ -120,9 +125,12 @@ JSON response:"""
 # --- Node 4: Confidence gate (this is the branching logic) ---
 def confidence_gate_node(state: AgentState) -> AgentState:
     if state["confidence"] >= CONFIDENCE_THRESHOLD:
-        return {**state, "final_status": "auto_routed"}
+        final_status = "auto_routed"
     else:
-        return {**state, "final_status": "needs_human_review"}
+        final_status = "needs_human_review"
+
+    logger.info(f"'{state['filename']}' confidence={state['confidence']}, status={final_status}")
+    return {**state, "final_status": final_status}
 
 
 # --- Build the graph ---
