@@ -15,13 +15,13 @@ from search import search_policies
 load_dotenv()
 
 llm = ChatGroq(
-    model="openai/gpt-oss-120b",
+    model=os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"),
     api_key=os.getenv("GROQ_API_KEY"),
     temperature=0
 )
 
 CATEGORIES = ["invoice", "loan_application", "kyc", "contract", "other"]
-CONFIDENCE_THRESHOLD = 0.75  # below this → human review
+CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", "0.75"))  # below this → human review
 
 # --- State definition: this is what flows through every node ---
 class AgentState(TypedDict):
@@ -91,13 +91,26 @@ Relevant policy: {state['policy_text']}
 
 JSON response:"""
 
-    response = llm.invoke(prompt)
     try:
+        response = llm.invoke(prompt)
         decision = json.loads(response.content.strip())
+
+        # validate the response has what we need, with sane fallbacks
+        if not all(k in decision for k in ["route", "justification", "confidence"]):
+            raise ValueError("LLM response missing required fields")
+
+        decision["confidence"] = max(0.0, min(1.0, float(decision["confidence"])))  # clamp to valid range
+
     except json.JSONDecodeError:
         decision = {
             "route": "Manual Review Queue",
-            "justification": "Could not parse structured decision.",
+            "justification": "AI could not produce a structured decision; flagged for manual review.",
+            "confidence": 0.0
+        }
+    except Exception as e:
+        decision = {
+            "route": "Manual Review Queue",
+            "justification": f"Decision process encountered an error: {str(e)[:100]}. Flagged for manual review.",
             "confidence": 0.0
         }
 

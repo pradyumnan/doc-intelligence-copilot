@@ -52,13 +52,16 @@ def decide(request: DecisionRequest):
 
 @router.post("/agent/decide-from-image", response_model=DecisionResponse)
 async def decide_from_image(file: UploadFile = File(...)):
-    # Save uploaded file temporarily, run OCR, then run the agent
     with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
         content = await file.read()
         tmp.write(content)
         tmp_path = tmp.name
 
-    document_text = extract_text(tmp_path)
-    os.unlink(tmp_path)  # clean up temp file
+    try:
+        document_text = extract_text(tmp_path)
+    except Exception as e:
+        document_text = ""  # empty text still flows through gracefully (becomes "other" category)
+    finally:
+        os.unlink(tmp_path)
 
     return run_agent(document_text, file.filename)
