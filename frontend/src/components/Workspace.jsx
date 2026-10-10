@@ -85,6 +85,7 @@ function UploadZone({ onFile, busy }) {
 
 function Detail({ item, onBack }) {
   const routed = isRouted(item);
+  const noPolicy = item.category === 'other';
   const rule = /rules?\s*(\d+)/i.exec(item.justification || '');
 
   return (
@@ -100,18 +101,30 @@ function Detail({ item, onBack }) {
         </p>
       </header>
 
+
       <section className={`verdict ${routed ? 'is-routed' : 'is-review'}`}>
         <p className="verdict-title">
-          {routed ? `Sent to ${item.route} automatically` : 'Held for your review'}
+          {routed
+            ? `Sent to ${item.route} automatically`
+            : 'Held for your review'}
         </p>
         <p>
-          {routed
-            ? 'Confidence cleared the review cutoff, so nobody needs to look at it.'
-            : `Confidence is below the review cutoff. Suggested queue: ${item.route}.`}
+          {noPolicy
+            ? `No policy matched this document, so a person should look at it. Suggested queue: ${item.route}.`
+            : routed
+              ? 'Confidence cleared the review cutoff, so nobody needs to look at it.'
+              : `Confidence is below the review cutoff. Suggested queue: ${item.route}.`}
         </p>
       </section>
 
-      <ConfidenceMeter key={item.id} value={item.confidence} />
+
+          {noPolicy ? (
+            <p className="muted">
+              No policy matched this document, so there is no confidence score.
+            </p>
+          ) : (
+            <ConfidenceMeter key={item.id} value={item.confidence} />
+          )}
 
       <dl className="facts">
         <div>
@@ -302,7 +315,9 @@ export default function Workspace({ onSignOut }) {
                 >
                   <span className="case-top">
                     <span className="case-name">{c.filename}</span>
-                    <span className="case-conf">{percent(c.confidence)}</span>
+                    <span className="case-conf">
+                      {c.category === 'other' ? 'No match' : percent(c.confidence)}
+                    </span>
                   </span>
                   <span className="case-mid">
                     {categoryLabel(c.category)}, {isRouted(c) ? `sent to ${c.route}` : `suggested: ${c.route}`}
