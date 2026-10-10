@@ -2,26 +2,52 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const API_BASE = 'http://localhost:8080';
+const ALLOWED_TYPES = ['image/png', 'image/jpeg'];
+const MAX_SIZE_MB = 10;
 
 function App() {
   const [cases, setCases] = useState([]);
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
+  const [inputKey, setInputKey] = useState(0); // changing this resets the file input
 
-const fetchCases = async () => {
-  try {
-    const res = await axios.get(`${API_BASE}/cases`);
-    setCases(res.data.reverse());
-    setError(null); // clear any previous error once this succeeds
-  } catch (err) {
-    setError('Could not load cases. Is bpm-service running?');
-  }
-};
+  const fetchCases = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/cases`);
+      setCases(res.data.reverse()); // newest first
+      setError(null);
+    } catch (err) {
+      setError('Could not load cases. Is bpm-service running?');
+    }
+  };
 
   useEffect(() => {
     fetchCases();
   }, []);
+
+  const handleFileChange = (e) => {
+    const selected = e.target.files[0];
+    setError(null);
+
+    if (!selected) {
+      setFile(null);
+      return;
+    }
+    if (!ALLOWED_TYPES.includes(selected.type)) {
+      setError('Only PNG or JPEG images are supported.');
+      setFile(null);
+      e.target.value = '';
+      return;
+    }
+    if (selected.size > MAX_SIZE_MB * 1024 * 1024) {
+      setError(`File is too large (max ${MAX_SIZE_MB} MB).`);
+      setFile(null);
+      e.target.value = '';
+      return;
+    }
+    setFile(selected);
+  };
 
   const handleUpload = async () => {
     if (!file) return;
@@ -36,9 +62,10 @@ const fetchCases = async () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setFile(null);
+      setInputKey((k) => k + 1);
       await fetchCases();
     } catch (err) {
-      setError('Processing failed. Check that ai-service is running.');
+      setError(err.response?.data?.error || 'Processing failed. Please try again.');
     } finally {
       setUploading(false);
     }
@@ -52,9 +79,10 @@ const fetchCases = async () => {
       <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem' }}>
         <h3>Upload Document</h3>
         <input
+          key={inputKey}
           type="file"
-          accept="image/*"
-          onChange={(e) => setFile(e.target.files[0])}
+          accept="image/png,image/jpeg"
+          onChange={handleFileChange}
         />
         <button
           onClick={handleUpload}
