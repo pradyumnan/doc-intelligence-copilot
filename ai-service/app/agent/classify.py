@@ -16,18 +16,22 @@ CLASSIFY_PROMPT = """You classify documents for a bank's document management sys
 
 Decide what the document ITSELF is, not what it talks about. A document that merely mentions
 invoices, loans, KYC or contracts is "other" unless it is itself one of those documents.
+A document that only has a title, label or heading and no content (a file folder label,
+a cover sheet, a title page) is "other".
 
 Categories:
 - invoice: a bill issued BY a vendor asking to be paid. Has an invoice number, a vendor and an amount due.
   NOT an invoice: a letter or email confirming payment of invoices, a receipt, a quotation,
-  a purchase order, a bank statement.
+  a purchase order, a bank statement, a voucher, a cheque, a remittance advice.
 - loan_application: a form or request submitted BY an applicant asking for a loan
   (applicant details, amount requested, income proof).
   NOT a loan application: a letter approving or rejecting a loan, a loan statement.
 - kyc: identity or address verification (ID numbers such as PAN or Aadhaar, address proof,
   verification status, corporate KYC checklists).
 - contract: a signed or signable agreement between parties with terms, duration and obligations.
-  NOT a contract: an email or letter discussing a draft agreement, a quotation, a proposal.
+  NOT a contract: an email or letter discussing a draft agreement, a cover or transmittal
+  letter that only encloses, attaches or refers to an agreement or addendum, a quotation,
+  a proposal, a file folder label naming an agreement.
 - other: everything else, including general letters, memos, emails, circulars, reports,
   advertisements, receipts, quotations, purchase orders and statements.
 

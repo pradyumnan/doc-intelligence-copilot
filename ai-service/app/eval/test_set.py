@@ -101,6 +101,18 @@ TEST_SET = [
         "expected_category": "contract",
         "expected_route_contains": None,
     },
+    {
+        "filename": "hard_folder_label.txt",
+        "text": "Agreement Between Lorillard and the supplier\nbL9ORL16",
+        "expected_category": "other",
+        "expected_route_contains": None,
+    },
+    {
+        "filename": "hard_transmittal_letter.txt",
+        "text": "July 11, 1990\n\nMr. C. E. Altman\nSRO/PACE Promotions\n5750 Wilshire Boulevard Suite 225\nLos Angeles, CA 90036\n\nDear Mr. Altman:\n\nPlease find enclosed an executed addendum to the contract between SRO/PACE Promotions and Sports Marketing Enterprises regarding sponsorship of the Supercross Series.\n\nSincerely,\nContracts Administrator",
+        "expected_category": "other",
+        "expected_route_contains": None,
+    },
 ]
 
 # Do NOT tune prompts against these. Run once when the prompt is final.
