@@ -1,0 +1,79 @@
+{
+  "set": "heldout",
+  "results": [
+    {
+      "filename": "heldout_invoice_goods.txt",
+      "expected_category": "invoice",
+      "actual_category": "invoice",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.99,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "heldout_payment_confirmation.txt",
+      "expected_category": "other",
+      "actual_category": "other",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.5,
+      "final_status": "needs_human_review"
+    },
+    {
+      "filename": "heldout_home_loan.txt",
+      "expected_category": "loan_application",
+      "actual_category": "loan_application",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.99,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "heldout_loan_approval.txt",
+      "expected_category": "other",
+      "actual_category": "other",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.5,
+      "final_status": "needs_human_review"
+    },
+    {
+      "filename": "heldout_kyc_corporate.txt",
+      "expected_category": "kyc",
+      "actual_category": "kyc",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.97,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "heldout_contract_vendor.txt",
+      "expected_category": "contract",
+      "actual_category": "contract",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.95,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "heldout_email_about_contract.txt",
+      "expected_category": "other",
+      "actual_category": "contract",
+      "category_correct": false,
+      "route_match": null,
+      "confidence": 0.78,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "heldout_circular.txt",
+      "expected_category": "other",
+      "actual_category": "other",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.5,
+      "final_status": "needs_human_review"
+    }
+  ],
+  "classification_accuracy": 0.875,
+  "wrong_and_auto_routed": 1
+}

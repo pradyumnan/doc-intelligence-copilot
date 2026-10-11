@@ -1,0 +1,151 @@
+{
+  "set": "tuning",
+  "results": [
+    {
+      "filename": "eval_invoice_small.txt",
+      "expected_category": "invoice",
+      "actual_category": "invoice",
+      "category_correct": true,
+      "route_match": true,
+      "confidence": 0.99,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "eval_invoice_large.txt",
+      "expected_category": "invoice",
+      "actual_category": "invoice",
+      "category_correct": true,
+      "route_match": true,
+      "confidence": 0.99,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "eval_kyc.txt",
+      "expected_category": "kyc",
+      "actual_category": "kyc",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.98,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "eval_loan.txt",
+      "expected_category": "loan_application",
+      "actual_category": "loan_application",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.98,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "eval_contract.txt",
+      "expected_category": "contract",
+      "actual_category": "contract",
+      "category_correct": true,
+      "route_match": true,
+      "confidence": 0.99,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "eval_other_memo.txt",
+      "expected_category": "other",
+      "actual_category": "other",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.5,
+      "final_status": "needs_human_review"
+    },
+    {
+      "filename": "hard_payment_advice_letter.txt",
+      "expected_category": "other",
+      "actual_category": "invoice",
+      "category_correct": false,
+      "route_match": null,
+      "confidence": 0.96,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "hard_quotation.txt",
+      "expected_category": "other",
+      "actual_category": "other",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.5,
+      "final_status": "needs_human_review"
+    },
+    {
+      "filename": "hard_purchase_order.txt",
+      "expected_category": "other",
+      "actual_category": "other",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.5,
+      "final_status": "needs_human_review"
+    },
+    {
+      "filename": "hard_receipt.txt",
+      "expected_category": "other",
+      "actual_category": "other",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.5,
+      "final_status": "needs_human_review"
+    },
+    {
+      "filename": "hard_loan_rejection.txt",
+      "expected_category": "other",
+      "actual_category": "loan_application",
+      "category_correct": false,
+      "route_match": null,
+      "confidence": 0.92,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "hard_bank_statement.txt",
+      "expected_category": "other",
+      "actual_category": "other",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.5,
+      "final_status": "needs_human_review"
+    },
+    {
+      "filename": "varied_invoice_services.txt",
+      "expected_category": "invoice",
+      "actual_category": "invoice",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.99,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "varied_loan.txt",
+      "expected_category": "loan_application",
+      "actual_category": "loan_application",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.98,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "varied_kyc.txt",
+      "expected_category": "kyc",
+      "actual_category": "kyc",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.99,
+      "final_status": "auto_routed"
+    },
+    {
+      "filename": "varied_contract.txt",
+      "expected_category": "contract",
+      "actual_category": "contract",
+      "category_correct": true,
+      "route_match": null,
+      "confidence": 0.7,
+      "final_status": "needs_human_review"
+    }
+  ],
+  "classification_accuracy": 0.875,
+  "wrong_and_auto_routed": 2
+}
