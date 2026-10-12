@@ -1,0 +1,78 @@
+{
+  "results": [
+    {
+      "name": "invoice small, correct",
+      "expected_supported": true,
+      "verified": true,
+      "correct": true,
+      "note": null
+    },
+    {
+      "name": "invoice large, correct",
+      "expected_supported": true,
+      "verified": true,
+      "correct": true,
+      "note": null
+    },
+    {
+      "name": "kyc, correct",
+      "expected_supported": true,
+      "verified": true,
+      "correct": true,
+      "note": null
+    },
+    {
+      "name": "invoice missing GSTIN, correct absence claim",
+      "expected_supported": true,
+      "verified": true,
+      "correct": true,
+      "note": null
+    },
+    {
+      "name": "cover letter, invented liability clause",
+      "expected_supported": false,
+      "verified": false,
+      "correct": true,
+      "note": "the document contains a non-standard liability clause"
+    },
+    {
+      "name": "invoice small, wrong amount claimed",
+      "expected_supported": false,
+      "verified": false,
+      "correct": true,
+      "note": "The invoice total is ₹75,000"
+    },
+    {
+      "name": "kyc, wrong proof claimed",
+      "expected_supported": false,
+      "verified": false,
+      "correct": true,
+      "note": "The address proof is a passport"
+    },
+    {
+      "name": "loan, wrong credit score claimed",
+      "expected_supported": false,
+      "verified": false,
+      "correct": true,
+      "note": "The credit score is 610, below 650"
+    },
+    {
+      "name": "contract, standard clause called non-standard",
+      "expected_supported": false,
+      "verified": false,
+      "correct": true,
+      "note": "The contract contains a non-standard liability clause"
+    },
+    {
+      "name": "invoice with no amount, amount claimed",
+      "expected_supported": false,
+      "verified": false,
+      "correct": true,
+      "note": "The invoice total of ₹60,000 exceeds ₹50,000"
+    }
+  ],
+  "caught": 6,
+  "unsupported_total": 6,
+  "wrongly_held": 0,
+  "supported_total": 4
+}
