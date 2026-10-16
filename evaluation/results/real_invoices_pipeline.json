@@ -1,0 +1,38 @@
+[
+  {
+    "filename": "doc_110_label11.png",
+    "category": "invoice",
+    "route": "Compliance Review",
+    "confidence": 0.9,
+    "verified": true,
+    "final_status": "auto_routed",
+    "justification": "Policy rule 4 applies because the document contains no vendor GSTIN, which is required for all invoices."
+  },
+  {
+    "filename": "doc_112_label11.png",
+    "category": "invoice",
+    "route": "Compliance Review",
+    "confidence": 0.9,
+    "verified": true,
+    "final_status": "auto_routed",
+    "justification": "Policy rule 4: any invoice missing a vendor GSTIN must be routed to the Compliance Review queue; the document contains no GSTIN identifier."
+  },
+  {
+    "filename": "doc_113_label11.png",
+    "category": "invoice",
+    "route": "Compliance Review",
+    "confidence": 0.9,
+    "verified": true,
+    "final_status": "auto_routed",
+    "justification": "Policy rule 4 applies because the invoice does not contain a vendor GSTIN."
+  },
+  {
+    "filename": "doc_116_label11.png",
+    "category": "invoice",
+    "route": "Compliance Review",
+    "confidence": 0.9,
+    "verified": true,
+    "final_status": "auto_routed",
+    "justification": "Policy rule 4 requires routing to Compliance Review when a vendor GSTIN is missing; the document contains no GSTIN field."
+  }
+]

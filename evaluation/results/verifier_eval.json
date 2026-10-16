@@ -33,14 +33,14 @@
       "expected_supported": false,
       "verified": false,
       "correct": true,
-      "note": "the document contains a non-standard liability clause"
+      "note": "the contract contains a non-standard liability clause"
     },
     {
       "name": "invoice small, wrong amount claimed",
       "expected_supported": false,
       "verified": false,
       "correct": true,
-      "note": "The invoice total is ₹75,000"
+      "note": "The invoice total is ₹75,000, above ₹50,000"
     },
     {
       "name": "kyc, wrong proof claimed",
