@@ -1,5 +1,6 @@
 package com.pradyumnan.bpm_service.config;
 
+import com.pradyumnan.bpm_service.repository.UserRepository;
 import com.pradyumnan.bpm_service.security.JwtAuthFilter;
 import com.pradyumnan.bpm_service.security.JwtService;
 import org.springframework.context.annotation.Bean;
@@ -19,9 +20,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-    public SecurityConfig(JwtService jwtService) {
+    public SecurityConfig(JwtService jwtService, UserRepository userRepository) {
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     @Bean
@@ -37,11 +40,21 @@ public class SecurityConfig {
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/health", "/auth/**").permitAll()
+                // public
+                .requestMatchers("/health", "/auth/register", "/auth/login").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .anyRequest().authenticated()
+                // any signed-in user, including one who must still change their password
+                .requestMatchers("/auth/change-password", "/auth/me").authenticated()
+                // administrators only
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                // working with documents: reviewers and admins
+                .requestMatchers(HttpMethod.POST, "/cases/**").hasAnyRole("ADMIN", "REVIEWER")
+                // reading cases: every role
+                .requestMatchers(HttpMethod.GET, "/cases/**").hasAnyRole("ADMIN", "REVIEWER", "VIEWER")
+                // anything else needs a real role
+                .anyRequest().hasAnyRole("ADMIN", "REVIEWER", "VIEWER")
             )
-            .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new JwtAuthFilter(jwtService, userRepository), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
