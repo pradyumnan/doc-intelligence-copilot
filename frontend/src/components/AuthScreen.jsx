@@ -6,6 +6,7 @@ export default function AuthScreen({ onSignedIn, notice }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const [info, setInfo] = useState(null);
   const [busy, setBusy] = useState(false);
   const isRegister = mode === 'register';
 
@@ -13,8 +14,16 @@ export default function AuthScreen({ onSignedIn, notice }) {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    setInfo(null);
     try {
-      if (isRegister) await api.post('/auth/register', { username, password });
+      if (isRegister) {
+        await api.post('/auth/register', { username, password });
+        // New accounts cannot sign in until an administrator approves them
+        setInfo('Account created. An administrator must approve it before you can sign in.');
+        setMode('login');
+        setPassword('');
+        return;
+      }
       const res = await api.post('/auth/login', { username, password });
       setToken(res.data.token);
       onSignedIn();
@@ -27,6 +36,7 @@ export default function AuthScreen({ onSignedIn, notice }) {
 
   const switchMode = () => {
     setError(null);
+    setInfo(null);
     setMode(isRegister ? 'login' : 'register');
   };
 
@@ -43,10 +53,15 @@ export default function AuthScreen({ onSignedIn, notice }) {
 
       <main className="auth-form-wrap">
         <form className="auth-form" onSubmit={submit}>
-          <h2>{isRegister ? 'Create an account' : 'Sign in'}</h2>
+          <h2>{isRegister ? 'Request an account' : 'Sign in'}</h2>
           {notice && (
             <p className="note" role="status">
               {notice}
+            </p>
+          )}
+          {info && (
+            <p className="note" role="status">
+              {info}
             </p>
           )}
 
@@ -69,7 +84,11 @@ export default function AuthScreen({ onSignedIn, notice }) {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          {isRegister && <p className="hint">Use at least 8 characters.</p>}
+          {isRegister && (
+            <p className="hint">
+              At least 8 characters. An administrator approves new accounts before they can sign in.
+            </p>
+          )}
 
           {error && (
             <p className="error" role="alert">
@@ -78,13 +97,13 @@ export default function AuthScreen({ onSignedIn, notice }) {
           )}
 
           <button className="btn-primary" type="submit" disabled={busy || !username || !password}>
-            {busy ? 'Please wait' : isRegister ? 'Create account' : 'Sign in'}
+            {busy ? 'Please wait' : isRegister ? 'Request account' : 'Sign in'}
           </button>
 
           <p className="switch">
-            {isRegister ? 'Already have an account? ' : 'New here? '}
+            {isRegister ? 'Already approved? ' : 'Need an account? '}
             <button type="button" className="link" onClick={switchMode}>
-              {isRegister ? 'Sign in' : 'Create an account'}
+              {isRegister ? 'Sign in' : 'Request one'}
             </button>
           </p>
         </form>

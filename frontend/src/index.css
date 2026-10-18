@@ -93,6 +93,7 @@ input {
   cursor: not-allowed;
 }
 .btn-quiet {
+  white-space: nowrap;
   background: none;
   border: 1px solid var(--rule);
   border-radius: 6px;
@@ -156,25 +157,29 @@ input {
   font-size: 1.4rem;
   margin-bottom: 0.75rem;
 }
-.auth-form label {
+.auth-form label,
+.form label {
   font-weight: 600;
   font-size: 0.875rem;
   margin-top: 0.5rem;
 }
-.auth-form input {
+.auth-form input,
+.form input {
   border: 1px solid #aeb7c2;
   border-radius: 6px;
   padding: 0.6rem 0.75rem;
   background: #fff;
 }
-.auth-form .btn-primary {
+.auth-form .btn-primary,
+.form .btn-primary {
   margin-top: 1rem;
 }
 .hint {
   color: var(--ink-soft);
   font-size: 0.85rem;
 }
-.auth-form .error {
+.auth-form .error,
+.form .error {
   color: var(--danger);
   font-size: 0.9rem;
 }
@@ -267,7 +272,9 @@ input {
 .drop {
   border: 1.5px dashed #9aa6b4;
   border-radius: 8px;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 .drop:focus-within,
 .drop.is-dragging {
@@ -542,6 +549,181 @@ input {
   white-space: nowrap;
 }
 
+/* App shell, pages, users ----------------------------------------------- */
+.boot {
+  padding: 2rem;
+  color: var(--ink-soft);
+}
+.content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  min-width: 0;
+}
+.nav {
+  display: flex;
+  gap: 0.25rem;
+}
+.nav button {
+  background: none;
+  border: 0;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.nav button:hover {
+  background: var(--ground);
+}
+.nav button[aria-current='page'] {
+  background: var(--ground);
+  color: var(--ink);
+  font-weight: 600;
+}
+.who {
+  font-size: 0.9rem;
+}
+.role-tag {
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: 10px;
+  background: var(--ground);
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+}
+.page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 2rem clamp(1rem, 4vw, 2.5rem);
+}
+.page > * + * {
+  margin-top: 1rem;
+}
+.page > h2 {
+  font-size: 1.4rem;
+}
+.page-narrow {
+  width: 100%;
+  max-width: 480px;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 360px;
+}
+.form .btn-primary {
+  align-self: flex-start;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+}
+.users {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+}
+.users th,
+.users td {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: middle;
+}
+.users thead th {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.users tbody th {
+  font-weight: 600;
+}
+.users tbody tr:last-child th,
+.users tbody tr:last-child td {
+  border-bottom: 0;
+}
+.you {
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+.status {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.status-active {
+  color: var(--routed);
+}
+.status-pending {
+  color: var(--review);
+}
+.status-disabled {
+  color: var(--ink-soft);
+}
+.users select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #aeb7c2;
+  border-radius: 6px;
+  background: #fff;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.btn-small {
+  background: var(--surface);
+  border: 1px solid #aeb7c2;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.btn-small:hover:not(:disabled) {
+  background: var(--ground);
+}
+.btn-small.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.btn-small.primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+.btn-small:disabled,
+.users select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.temp {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1rem;
+  background: #fff8ec;
+  border-left: 4px solid var(--review-bar);
+}
+.temp-value {
+  font:
+    600 1.25rem/1.4 ui-monospace,
+    'Cascadia Mono',
+    Consolas,
+    monospace;
+  letter-spacing: 0.04em;
+  user-select: all;
+}
+
 /* Small screens: one pane at a time ------------------------------------- */
 @media (max-width: 860px) {
   .auth {
@@ -567,6 +749,20 @@ input {
   }
   .facts {
     grid-template-columns: 1fr;
+  }
+  .topbar-left .brand-name,
+  .who {
+    display: none;
+  }
+  .topbar {
+    padding: 0 0.75rem;
+  }
+  .topbar-left,
+  .topbar-right {
+    gap: 0.5rem;
+  }
+  .nav button {
+    padding: 0.4rem 0.5rem;
   }
 }
 

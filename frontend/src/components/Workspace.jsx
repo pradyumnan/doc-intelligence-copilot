@@ -4,7 +4,7 @@ import ConfidenceMeter from './ConfidenceMeter';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg'];
 const MAX_MB = 10;
-const SESSION_EXPIRED = 'Your session expired. Sign in again.';
+const SESSION_EXPIRED = 'Your session has ended. Sign in again.';
 
 const CATEGORY_LABELS = {
   invoice: 'Invoice',
@@ -85,8 +85,8 @@ function UploadZone({ onFile, busy }) {
 
 function Detail({ item, onBack }) {
   const routed = isRouted(item);
-  const noPolicy = item.category === 'other';
   const rule = /rules?\s*(\d+)/i.exec(item.justification || '');
+  const noPolicy = item.category === 'other'; // the 0.5 for 'other' is a fixed value, not a model score
 
   return (
     <article className="detail-body">
@@ -101,30 +101,24 @@ function Detail({ item, onBack }) {
         </p>
       </header>
 
-
       <section className={`verdict ${routed ? 'is-routed' : 'is-review'}`}>
         <p className="verdict-title">
-          {routed
-            ? `Sent to ${item.route} automatically`
-            : 'Held for your review'}
+          {routed ? `Sent to ${item.route} automatically` : 'Held for your review'}
         </p>
         <p>
-          {noPolicy
-            ? `No policy matched this document, so a person should look at it. Suggested queue: ${item.route}.`
-            : routed
-              ? 'Confidence cleared the review cutoff, so nobody needs to look at it.'
+          {routed
+            ? 'Confidence cleared the review cutoff, so nobody needs to look at it.'
+            : noPolicy
+              ? `A person should look at it. Suggested queue: ${item.route}.`
               : `Confidence is below the review cutoff. Suggested queue: ${item.route}.`}
         </p>
       </section>
 
-
-          {noPolicy ? (
-            <p className="muted">
-              No policy matched this document, so there is no confidence score.
-            </p>
-          ) : (
-            <ConfidenceMeter key={item.id} value={item.confidence} />
-          )}
+      {noPolicy ? (
+        <p className="muted">No policy matched this document, so there is no confidence score.</p>
+      ) : (
+        <ConfidenceMeter key={item.id} value={item.confidence} />
+      )}
 
       <dl className="facts">
         <div>
@@ -146,7 +140,7 @@ function Detail({ item, onBack }) {
   );
 }
 
-export default function Workspace({ onSignOut }) {
+export default function Workspace({ canUpload = true, onSignOut }) {
   const [cases, setCases] = useState(null); // null while the first load is running
   const [filter, setFilter] = useState('all');
   const [selectedId, setSelectedId] = useState(null);
@@ -251,95 +245,103 @@ export default function Workspace({ onSignOut }) {
     if (counts.all === 0) {
       emptyState = {
         title: 'Nothing to review yet',
-        body: 'Add a PNG or JPEG scan above to see how the system classifies and routes it.',
+        body: canUpload
+          ? 'Add a PNG or JPEG scan above to see how the system classifies and routes it.'
+          : 'Documents uploaded by reviewers will appear here.',
       };
     } else if (filter === 'review') {
-      emptyState = { title: 'Nothing waiting on you', body: 'Every document so far was routed automatically.' };
+      emptyState = {
+        title: 'Nothing waiting on you',
+        body: 'Every document so far was routed automatically.',
+      };
     } else {
-      emptyState = { title: 'No auto-routed documents', body: 'Every document so far needs a person to look at it.' };
+      emptyState = {
+        title: 'No auto-routed documents',
+        body: 'Every document so far needs a person to look at it.',
+      };
     }
   }
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <span className="brand-name">Doc Intelligence Copilot</span>
-        <button type="button" className="btn-quiet" onClick={() => onSignOut()}>
-          Sign out
-        </button>
-      </header>
+    <div className={`workspace ${selected ? 'has-selection' : ''}`}>
+      <section className="queue" aria-label="Documents">
+        <div className="queue-head">
+          <p className="summary">{summary}</p>
 
-      <div className={`workspace ${selected ? 'has-selection' : ''}`}>
-        <section className="queue" aria-label="Documents">
-          <div className="queue-head">
-            <p className="summary">{summary}</p>
-
-            <div className="filters" role="group" aria-label="Filter documents">
-              {FILTERS.map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  aria-pressed={filter === f.id}
-                  onClick={() => setFilter(f.id)}
-                >
-                  {f.name}
-                  <span className="count">{counts[f.id]}</span>
-                </button>
-              ))}
-            </div>
-
-            <UploadZone onFile={handleFile} busy={uploading} />
-
-            <div aria-live="polite">
-              {message && <p className={`message ${message.kind}`}>{message.text}</p>}
-            </div>
+          <div className="filters" role="group" aria-label="Filter documents">
+            {FILTERS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                aria-pressed={filter === f.id}
+                onClick={() => setFilter(f.id)}
+              >
+                {f.name}
+                <span className="count">{counts[f.id]}</span>
+              </button>
+            ))}
           </div>
 
-          {emptyState && (
-            <div className="empty">
-              <strong>{emptyState.title}</strong>
-              {emptyState.body}
-            </div>
-          )}
-
-          <ul className="case-list">
-            {visible.map((c) => (
-              <li key={c.id}>
-                <button
-                  type="button"
-                  className={`case-row ${isRouted(c) ? 'is-routed' : 'is-review'} ${
-                    c.id === selectedId ? 'is-selected' : ''
-                  }`}
-                  aria-current={c.id === selectedId ? 'true' : undefined}
-                  onClick={() => setSelectedId(c.id)}
-                >
-                  <span className="case-top">
-                    <span className="case-name">{c.filename}</span>
-                    <span className="case-conf">
-                      {c.category === 'other' ? 'No match' : percent(c.confidence)}
-                    </span>
-                  </span>
-                  <span className="case-mid">
-                    {categoryLabel(c.category)}, {isRouted(c) ? `sent to ${c.route}` : `suggested: ${c.route}`}
-                  </span>
-                  <span className="case-bottom">
-                    <span className="case-status">{isRouted(c) ? 'Auto-routed' : 'Needs review'}</span>
-                    <span className="case-time">{formatTime(c.createdAt)}</span>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="detail" aria-label="Document details">
-          {selected ? (
-            <Detail item={selected} onBack={() => setSelectedId(null)} />
+          {canUpload ? (
+            <UploadZone onFile={handleFile} busy={uploading} />
           ) : (
-            <p className="detail-empty">Select a document to see how it was routed and why.</p>
+            <p className="muted">
+              You have read-only access. Ask an administrator if you need to upload.
+            </p>
           )}
-        </section>
-      </div>
+
+          <div aria-live="polite">
+            {message && <p className={`message ${message.kind}`}>{message.text}</p>}
+          </div>
+        </div>
+
+        {emptyState && (
+          <div className="empty">
+            <strong>{emptyState.title}</strong>
+            {emptyState.body}
+          </div>
+        )}
+
+        <ul className="case-list">
+          {visible.map((c) => (
+            <li key={c.id}>
+              <button
+                type="button"
+                className={`case-row ${isRouted(c) ? 'is-routed' : 'is-review'} ${
+                  c.id === selectedId ? 'is-selected' : ''
+                }`}
+                aria-current={c.id === selectedId ? 'true' : undefined}
+                onClick={() => setSelectedId(c.id)}
+              >
+                <span className="case-top">
+                  <span className="case-name">{c.filename}</span>
+                  <span className="case-conf">
+                    {c.category === 'other' ? 'No match' : percent(c.confidence)}
+                  </span>
+                </span>
+                <span className="case-mid">
+                  {categoryLabel(c.category)},{' '}
+                  {isRouted(c) ? `sent to ${c.route}` : `suggested: ${c.route}`}
+                </span>
+                <span className="case-bottom">
+                  <span className="case-status">
+                    {isRouted(c) ? 'Auto-routed' : 'Needs review'}
+                  </span>
+                  <span className="case-time">{formatTime(c.createdAt)}</span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="detail" aria-label="Document details">
+        {selected ? (
+          <Detail item={selected} onBack={() => setSelectedId(null)} />
+        ) : (
+          <p className="detail-empty">Select a document to see how it was routed and why.</p>
+        )}
+      </section>
     </div>
   );
 }
