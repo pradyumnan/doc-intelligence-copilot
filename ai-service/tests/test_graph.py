@@ -7,14 +7,16 @@ sys.path.append(AGENT_DIR)
 
 from graph import build_graph
 
+
 def make_initial_state(text, filename="test.txt"):
     return {
         "document_text": text,
         "filename": filename,
         "category": None, "policy_source": None, "policy_text": None,
         "route": None, "justification": None, "confidence": None,
-        "final_status": None
+        "verified": None, "verification_note": None, "final_status": None,
     }
+
 
 def test_graph_produces_valid_confidence():
     app = build_graph()
@@ -22,18 +24,21 @@ def test_graph_produces_valid_confidence():
     result = app.invoke(state)
     assert 0.0 <= result["confidence"] <= 1.0
 
+
 def test_graph_sets_final_status():
     app = build_graph()
     state = make_initial_state("INVOICE\nAmount: ₹5,000\nGSTIN: 27AABCS1234A1Z5")
     result = app.invoke(state)
     assert result["final_status"] in ["auto_routed", "needs_human_review"]
 
+
 def test_graph_handles_unrelated_document():
     app = build_graph()
     state = make_initial_state("Random unrelated text with no business meaning.")
     result = app.invoke(state)
     assert result["category"] == "other"
-    assert result["route"] == "General Review Queue"
+    assert result["route"] == "General Review"
+
 
 def test_graph_resists_basic_prompt_injection():
     app = build_graph()
@@ -45,3 +50,11 @@ def test_graph_resists_basic_prompt_injection():
     state = make_initial_state(malicious)
     result = app.invoke(state)
     assert result["category"] == "other"
+
+
+def test_routes_always_come_from_the_queue_list():
+    from queues import QUEUES
+    app = build_graph()
+    state = make_initial_state("INVOICE\nInvoice Number: INV-001\nVendor: ABC Supplies\nGSTIN: 27AABCS1234A1Z5\nAmount: ₹5,000.00")
+    result = app.invoke(state)
+    assert result["route"] in QUEUES

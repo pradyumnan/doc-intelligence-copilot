@@ -1,6 +1,8 @@
 import sys
 import os
+import json
 import tempfile
+from typing import Optional
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from PIL import Image, UnidentifiedImageError
@@ -16,12 +18,14 @@ sys.path.append(INGESTION_DIR)
 from logging_config import logger
 from graph import build_graph
 from ocr import extract_text
+from extract_fields import extract_fields
 
 router = APIRouter()
 agent_app = build_graph()  # built once at startup, reused for every request
 
 MAX_FILE_SIZE_MB = 10
 ALLOWED_CONTENT_TYPES = {"image/png", "image/jpeg"}
+MAX_TEXT_CHARS = 20000  # how much OCR text we hand back to be stored with the case
 
 
 class DecisionRequest(BaseModel):
@@ -36,6 +40,10 @@ class DecisionResponse(BaseModel):
     justification: str
     confidence: float
     final_status: str
+    policy_source: Optional[str] = None
+    verified: Optional[bool] = None
+    extracted_text: Optional[str] = None
+    fields_json: Optional[str] = None  # dates, amounts, people and organisations, as a JSON string
 
 
 def run_agent(document_text: str, filename: str) -> DecisionResponse:
@@ -44,16 +52,27 @@ def run_agent(document_text: str, filename: str) -> DecisionResponse:
         "filename": filename,
         "category": None, "policy_source": None, "policy_text": None,
         "route": None, "justification": None, "confidence": None,
-        "final_status": None
+        "verified": None, "verification_note": None, "final_status": None,
     }
     result = agent_app.invoke(initial_state)
+
+    try:
+        fields_json = json.dumps(extract_fields(document_text))
+    except Exception as e:
+        logger.warning(f"Field extraction failed for {filename}: {e}")
+        fields_json = None
+
     return DecisionResponse(
         filename=filename,
         category=result["category"],
         route=result["route"],
         justification=result["justification"],
         confidence=result["confidence"],
-        final_status=result["final_status"]
+        final_status=result["final_status"],
+        policy_source=result.get("policy_source"),
+        verified=result.get("verified"),
+        extracted_text=document_text[:MAX_TEXT_CHARS],
+        fields_json=fields_json,
     )
 
 
